@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorteo Especial: Auriculares RGB Gatito</title>
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at center, #2b004e, #000000 80%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+    color: white;
+}
+
+.fondo-luces {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: repeating-radial-gradient(circle, 
+    rgba(255, 0, 200, 0.05) 0px, 
+    rgba(0, 200, 255, 0.05) 50px, 
+    transparent 100px);
+    z-index: 0;
+}
+
+.container {
+    position: relative;
+    text-align: center;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.ruleta-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    position: relative;
+}
+
+.imagen-lado {
+    width: 120px;
+    height: 120px;
+    border: 2px dashed #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 12px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    background: -webkit-linear-gradient(#fff, #ffd700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.fecha-sorteo {
+    color: #ff00ff;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-shadow: 0 0 15px #ff00ff;
+}
+
+.premio-sub {
+    color: #00ffff;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px #00ffff;
+}
+
+.ruleta-container {
+    position: relative;
+    width: 500px;
+    height: 500px;
+}
+
+canvas {
+    border-radius: 50%;
+    box-shadow: 0 0 50px rgba(255, 0, 255, 0.4), inset 0 0 20px rgba(255,255,255,0.2);
+}
+
+.pointer {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 25px solid transparent;
+    border-right: 25px solid transparent;
+    border-top: 50px solid #fff;
+    filter: drop-shadow(0 0 10px #fff);
+    z-index: 3;
+}
+
+#mensaje {
+    margin-top: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    min-height: 40px;
+    color: #ffd700;
+    text-shadow: 0 0 15px #ff0000;
+}
+
+.contacto {
+    margin-top: 30px;
+    font-size: 16px;
+    color: #aaa;
+}
+
+.contacto span {
+    color: #00ffff;
+    font-weight: bold;
+}
+</style>
+</head>
+<body>
+
+<div class="fondo-luces"></div>
+
+<div class="container">
+    <h1>Gran Sorteo</h1>
+    <div class="fecha-sorteo">🎰 SE SORTEA EL 28 DE MARZO 🎰</div>
+    <div class="premio-sub">🎧 Auriculares RGB Gatito 🎀</div>
+    
+    <div class="ruleta-wrapper">
+        <div class="imagen-lado">Imagen Izquierda</div>
+        
+        <div class="ruleta-container">
+            <div class="pointer"></div>
+            <canvas id="ruleta" width="500" height="500"></canvas>
+        </div>
+        
+        <div class="imagen-lado">Imagen Derecha</div>
+    </div>
+    
+    <div id="mensaje"></div>
+    
+    <div class="contacto">
+        Consultar números disponibles al <span>1159677565</span>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById("ruleta");
+const ctx = canvas.getContext("2d");
+
+const numeros = Array.from({length: 30}, (_, i) => i + 1);
+const total = numeros.length;
+const angulo = 2 * Math.PI / total;
+
+const colores = ["#FF00FF","#00E5FF","#8A2BE2","#FFD700","#FF4500"];
+
+let rotacion = 0;
+let girandoEspecial = false;
+let giroEspecialIniciado = false;
+
+function dibujar() {
+    ctx.clearRect(0, 0, 500, 500);
+
+    const centro = 250;
+    const radio = 250;
+
+    for (let i = 0; i < total; i++) {
+        let inicio = angulo * i + rotacion;
+        let fin = inicio + angulo;
+
+        ctx.beginPath();
+        ctx.moveTo(centro, centro);
+        ctx.arc(centro, centro, radio, inicio, fin);
+        ctx.closePath();
+
+        ctx.fillStyle = colores[i % colores.length];
+        ctx.fill();
+
+        ctx.strokeStyle = "rgba(255,255,255,0.5)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        const anguloMedio = inicio + angulo / 2;
+
+        ctx.save();
+        ctx.translate(centro, centro);
+        ctx.rotate(anguloMedio);
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "white";
+        ctx.font = "bold 20px Arial";
+        ctx.shadowColor = "black";
+        ctx.shadowBlur = 6;
+
+        ctx.fillText(numeros[i], radio * 0.75, 0);
+        ctx.restore();
+    }
+}
+
+function animateNormal() {
+    rotacion += 0.01;
+    dibujar();
+
+    if (!girandoEspecial) {
+        requestAnimationFrame(animateNormal);
+    }
+}
+
+function esDiaDelSorteo() {
+    const hoy = new Date();
+    return (
+        hoy.getFullYear() === 2025 &&
+        hoy.getMonth() === 2 &&
+        hoy.getDate() === 28
+    );
+}
+
+function iniciarGiroEspecial() {
+    if (giroEspecialIniciado) return;
+
+    giroEspecialIniciado = true;
+    girandoEspecial = true;
+
+    const mensaje = document.getElementById("mensaje");
+    mensaje.innerHTML = "🎰 ¡BUSCANDO GANADOR! 🎰";
+
+    const ganadorIndex = Math.floor(Math.random() * total);
+    const anguloGanador = (2 * Math.PI - (ganadorIndex * angulo) - (angulo / 2));
+    const destinoFinal = (6 * 2 * Math.PI) + anguloGanador;
+
+    const duracion = 7000;
+    const inicioTiempo = performance.now();
+
+    function easeOut(t) {
+        return 1 - Math.pow(1 - t, 4);
+    }
+
+    function animar(tiempo) {
+        const progreso = Math.min((tiempo - inicioTiempo) / duracion, 1);
+        rotacion = destinoFinal * easeOut(progreso);
+        dibujar();
+
+        if (progreso < 1) {
+            requestAnimationFrame(animar);
+        } else {
+            const numeroGanador = numeros[ganadorIndex];
+            mensaje.innerHTML = `🎉 <span style="font-size:35px;color:white;">${numeroGanador}</span> 🎉<br>¡GANÓ LOS AURICULARES RGB GATITO! 🎧`;
+            mensaje.style.color = "#ffd700";
+        }
+    }
+
+    requestAnimationFrame(animar);
+}
+
+function verificarSorteo() {
+    if (!giroEspecialIniciado && esDiaDelSorteo()) {
+        iniciarGiroEspecial();
+    }
+    setTimeout(verificarSorteo, 1000);
+}
+
+dibujar();
+animateNormal();
+verificarSorteo();
+</script>
+
+</body>
+</html>
