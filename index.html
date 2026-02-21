@@ -144,7 +144,7 @@ canvas {
     <div class="ruleta-wrapper">
         
     <div class="imagen-lado">
-    <img src="izquierda 1.jpg" alt="Auriculares" style="width:100%; max-width:200px;">
+    <img src="izquierda 1.jpg" alt="Auriculares" style="width:130%; max-width:250px;">
 </div>
         
         <div class="ruleta-container">
@@ -152,7 +152,7 @@ canvas {
             <canvas id="ruleta" width="500" height="500"></canvas>
         </div>
         <div class="imagen-lado">
-    <img src="derecha.webp" alt="Auriculares" style="width:100%; max-width:200px;">
+    <img src="derecha.webp" alt="Auriculares" style="width:130%; max-width:250px;">
 </div>
     </div>
     
@@ -176,6 +176,9 @@ const colores = ["#FF00FF","#00E5FF","#8A2BE2","#FFD700","#FF4500"];
 let rotacion = 0;
 let girandoEspecial = false;
 let giroEspecialIniciado = false;
+
+// 📅 FECHA DEL SORTEO (3 de marzo 2025 a las 00:00)
+const fechaSorteo = new Date("2025-03-03T00:00:00");
 
 function dibujar() {
     ctx.clearRect(0, 0, 500, 500);
@@ -226,13 +229,32 @@ function animateNormal() {
     }
 }
 
-function esDiaDelSorteo() {
-    const hoy = new Date();
-    return (
-        hoy.getFullYear() === 2025 &&
-        hoy.getMonth() === 2 &&
-        hoy.getDate() === 28
-    );
+// ⏳ CUENTA REGRESIVA
+function actualizarCuentaRegresiva() {
+    const ahora = new Date();
+    const diferencia = fechaSorteo - ahora;
+
+    const mensaje = document.getElementById("mensaje");
+
+    if (diferencia <= 0) {
+        mensaje.innerHTML = "🎰 ¡EL SORTEO COMENZÓ! 🎰";
+        iniciarGiroEspecial();
+        return;
+    }
+
+    const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+    const horas = Math.floor((diferencia / (1000 * 60 * 60)) % 24);
+    const minutos = Math.floor((diferencia / (1000 * 60)) % 60);
+    const segundos = Math.floor((diferencia / 1000) % 60);
+
+    mensaje.innerHTML = `
+        ⏳ Faltan:<br>
+        <span style="font-size:22px;">
+        ${dias}d ${horas}h ${minutos}m ${segundos}s
+        </span>
+    `;
+
+    setTimeout(actualizarCuentaRegresiva, 1000);
 }
 
 function iniciarGiroEspecial() {
@@ -272,21 +294,15 @@ function iniciarGiroEspecial() {
     requestAnimationFrame(animar);
 }
 
-function verificarSorteo() {
-    if (!giroEspecialIniciado && esDiaDelSorteo()) {
-        iniciarGiroEspecial();
-    }
-    setTimeout(verificarSorteo, 1000);
-}
-
 dibujar();
 animateNormal();
-verificarSorteo();
+actualizarCuentaRegresiva();
 </script>
 
 </body>
 
 </html>
+
 
 
 
