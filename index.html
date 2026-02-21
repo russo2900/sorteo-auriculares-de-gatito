@@ -177,9 +177,16 @@ let rotacion = 0;
 let girandoEspecial = false;
 let giroEspecialIniciado = false;
 
-// 📅 FECHA DEL SORTEO (3 de marzo 2025 a las 00:00)
-const fechaSorteo = new Date("2025-03-03T00:00:00");
+/* ===== FECHA AUTOMÁTICA 3 DE MARZO ===== */
+const ahora = new Date();
+let fechaSorteo = new Date(ahora.getFullYear(), 2, 3, 0, 0, 0);
 
+// Si ya pasó este año, programa el próximo
+if (ahora > fechaSorteo) {
+    fechaSorteo.setFullYear(fechaSorteo.getFullYear() + 1);
+}
+
+/* ===== DIBUJAR RULETA (alineada correctamente) ===== */
 function dibujar() {
     ctx.clearRect(0, 0, 500, 500);
 
@@ -187,7 +194,9 @@ function dibujar() {
     const radio = 250;
 
     for (let i = 0; i < total; i++) {
-        let inicio = angulo * i + rotacion;
+
+        // Ajuste para que el número 1 empiece arriba
+        let inicio = angulo * i - Math.PI / 2 + rotacion;
         let fin = inicio + angulo;
 
         ctx.beginPath();
@@ -198,7 +207,7 @@ function dibujar() {
         ctx.fillStyle = colores[i % colores.length];
         ctx.fill();
 
-        ctx.strokeStyle = "rgba(255,255,255,0.5)";
+        ctx.strokeStyle = "rgba(255,255,255,0.6)";
         ctx.lineWidth = 2;
         ctx.stroke();
 
@@ -211,33 +220,31 @@ function dibujar() {
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillStyle = "white";
-        ctx.font = "bold 20px Arial";
+        ctx.font = "bold 18px Arial";
         ctx.shadowColor = "black";
-        ctx.shadowBlur = 6;
+        ctx.shadowBlur = 4;
 
         ctx.fillText(numeros[i], radio * 0.75, 0);
         ctx.restore();
     }
 }
 
+/* ===== ANIMACIÓN SUAVE INICIAL ===== */
 function animateNormal() {
-    rotacion += 0.01;
-    dibujar();
-
     if (!girandoEspecial) {
+        rotacion += 0.005;
+        dibujar();
         requestAnimationFrame(animateNormal);
     }
 }
 
-// ⏳ CUENTA REGRESIVA
+/* ===== CUENTA REGRESIVA ===== */
 function actualizarCuentaRegresiva() {
     const ahora = new Date();
     const diferencia = fechaSorteo - ahora;
-
     const mensaje = document.getElementById("mensaje");
 
     if (diferencia <= 0) {
-        mensaje.innerHTML = "🎰 ¡EL SORTEO COMENZÓ! 🎰";
         iniciarGiroEspecial();
         return;
     }
@@ -257,6 +264,7 @@ function actualizarCuentaRegresiva() {
     setTimeout(actualizarCuentaRegresiva, 1000);
 }
 
+/* ===== GIRO REALISTA Y ALINEADO ===== */
 function iniciarGiroEspecial() {
     if (giroEspecialIniciado) return;
 
@@ -267,10 +275,15 @@ function iniciarGiroEspecial() {
     mensaje.innerHTML = "🎰 ¡BUSCANDO GANADOR! 🎰";
 
     const ganadorIndex = Math.floor(Math.random() * total);
-    const anguloGanador = (2 * Math.PI - (ganadorIndex * angulo) - (angulo / 2));
-    const destinoFinal = (6 * 2 * Math.PI) + anguloGanador;
 
-    const duracion = 7000;
+    // Ajuste perfecto con la flecha
+    const anguloGanador = ganadorIndex * angulo;
+    const offsetFlecha = -Math.PI / 2 + angulo / 2;
+
+    const vueltas = 8; // Más vueltas = más realista
+    const destinoFinal = (vueltas * 2 * Math.PI) - anguloGanador + offsetFlecha;
+
+    const duracion = 8000;
     const inicioTiempo = performance.now();
 
     function easeOut(t) {
@@ -286,7 +299,14 @@ function iniciarGiroEspecial() {
             requestAnimationFrame(animar);
         } else {
             const numeroGanador = numeros[ganadorIndex];
-            mensaje.innerHTML = `🎉 <span style="font-size:35px;color:white;">${numeroGanador}</span> 🎉<br>¡GANÓ LOS AURICULARES RGB GATITO! 🎧`;
+            mensaje.innerHTML = `
+                🎉 <span style="font-size:38px;color:white;">
+                ${numeroGanador}
+                </span> 🎉<br>
+                ¡FELICIDADES ${numeroGanador}! 
+                GANASTE UNOS AURICULARES RGB 🎧
+                <br>Muchas gracias por participar
+            `;
             mensaje.style.color = "#ffd700";
         }
     }
@@ -302,6 +322,7 @@ actualizarCuentaRegresiva();
 </body>
 
 </html>
+
 
 
 
